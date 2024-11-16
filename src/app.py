@@ -5,12 +5,10 @@ from fastapi import FastAPI, Request
 from starlette.responses import JSONResponse
 
 from core.settings import get_settings
-from core.logger_config import init_logger, LOGGING_CONFIG
 from api.cars import router as car_router
 
-init_logger()
 settings = get_settings()
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 app = FastAPI(
     title=settings.PROJECT_NAME,
 )
@@ -44,4 +42,4 @@ async def time_log_middleware(request, call_next):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, port=8080, log_config=LOGGING_CONFIG)
+    uvicorn.run(app, port=8000, log_config="core/logging.yaml")
