@@ -24,7 +24,7 @@ async def get_car_list() -> list[Car]:
 @router.get("/{car_id}", response_model=Car)
 async def get_car(car_id: int) -> Car:
     if car_id == 0:
-        raise ValueError("Cannot delete car with id 0")
+        raise ValueError("Cannot get car with id 0")
     if car_id not in CARS:
         raise HTTPException(status_code=404, detail="Car not found")
     return CARS.get(car_id)

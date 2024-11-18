@@ -16,7 +16,7 @@ app = FastAPI(
 app.include_router(car_router, prefix="/cars", tags=["cars"])
 
 
-@app.exception_handler(Exception)
+@app.exception_handler(500)
 async def common_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,

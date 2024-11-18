@@ -41,8 +41,6 @@ async def test_get_car_422(xclient: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_get_car_500(xclient: AsyncClient):
-    response = await xclient.get("/cars/0")
-    assert response.status_code == 500, response.text
-    assert response.json() == {
-        'message': 'Failed method GET at URL http://127.0.0.1:8010/cars/0. Exception '"message is ValueError('Cannot delete car with id 0')."
-    }
+    with pytest.raises(ValueError) as exc:
+        await xclient.get("/cars/0")
+    assert str(exc.value) == "Cannot get car with id 0"
