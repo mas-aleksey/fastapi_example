@@ -8,9 +8,10 @@ from fastapi.testclient import TestClient
 from app import app
 
 
-@pytest.fixture()
+@pytest.fixture
 def client() -> Generator:
-    yield TestClient(app)
+    with TestClient(app) as client:
+        yield client
 
 
 @pytest_asyncio.fixture
