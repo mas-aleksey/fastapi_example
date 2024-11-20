@@ -1,16 +1,30 @@
 import logging
+from contextlib import asynccontextmanager
 from time import monotonic
 
 from fastapi import FastAPI, Request
 from starlette.responses import JSONResponse
 
-from core.settings import get_settings
+import controllers.car_controller as car_module
 from api.cars import router as car_router
+from core.settings import get_settings
+from models.db import CARS
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    logger.info("Do something at application startup")
+    car_module.controller = car_module.CarController(CARS)
+    yield
+
+    logger.info("Do something at application shutdown")
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
+    lifespan=lifespan,
 )
 
 app.include_router(car_router, prefix="/cars", tags=["cars"])
