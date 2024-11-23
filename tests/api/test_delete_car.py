@@ -1,12 +1,15 @@
 import pytest
 from httpx import AsyncClient
 
+from schemas.cars import Car
+
 
 @pytest.mark.asyncio
-async def test_delete_car_204(xclient: AsyncClient):
-    response = await xclient.delete("/cars/4")
+async def test_delete_car_204(xclient: AsyncClient,  car_db: dict[int, Car]):
+    response = await xclient.delete("/cars/3")
     assert response.status_code == 204, response.text
     assert response.content == b""
+    assert car_db.get(3) is None
 
 
 @pytest.mark.asyncio

@@ -1,13 +1,17 @@
 import pytest
 from httpx import AsyncClient
 
+from schemas.cars import Car
+
 
 @pytest.mark.asyncio
-async def test_create_car_201(xclient: AsyncClient):
+async def test_create_car_201(xclient: AsyncClient, car_db: dict[int, Car]):
     payload = {"name": "lamba", "color": "black"}
     response = await xclient.post("/cars/", json=payload)
+
     assert response.status_code == 201, response.text
     assert response.json() == {"id": 4, "name": "lamba", "color": "black",  "details": None}
+    assert car_db[4] == Car(id=4, name="lamba", color="black", details=None)
 
 
 @pytest.mark.asyncio
