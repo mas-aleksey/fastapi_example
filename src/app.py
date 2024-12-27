@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 import controllers.car_controller as car_module
 from api.cars import router as car_router
 from core.settings import get_settings
-from models.db import CARS
+from db.connector import DatabaseConnector
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -16,11 +16,12 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    logger.info("Do something at application startup")
-    car_module.controller = car_module.CarController(CARS)
+    logger.info("application startup")
+    db = DatabaseConnector(settings.DB.asyncpg_url)
+    car_module.controller = car_module.CarController(db)
     yield
-
-    logger.info("Do something at application shutdown")
+    await db.disconnect()
+    logger.info("application shutdown")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
