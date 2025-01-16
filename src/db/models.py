@@ -9,7 +9,7 @@ class BaseModel(DeclarativeBase):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
 
 
-class Manufacturer(BaseModel):
+class ManufacturerModel(BaseModel):
     """Модель производителя"""
 
     __tablename__ = "manufacturer"
@@ -27,9 +27,9 @@ class CarModel(BaseModel):
     model = Column(String(50), nullable=False)
     color = Column(String(50), nullable=False)
     details = Column(String(255), nullable=True)
-    manufacturer_id = Column(ForeignKey(Manufacturer.id), nullable=False)
+    manufacturer_id = Column(ForeignKey(ManufacturerModel.id), nullable=False)
 
-    manufacturer = relationship(Manufacturer, backref="cars")
+    manufacturer = relationship(ManufacturerModel, backref="cars")
 
     def __repr__(self) -> str:
         return f"Car({self.id=}, {self.model=}, {self.color=} {self.manufacturer_id=})"

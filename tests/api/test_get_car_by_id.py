@@ -1,24 +1,32 @@
+from uuid import uuid4
+
 import pytest
 from httpx import AsyncClient
 
+from db.models import CarModel, ManufacturerModel
+
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "car_id,expected", [
-        (1, {"id": 1, "color": "blue", "name": "BMW",  "details": None}),
-        (2, {"id": 2, "color": "blue", "name": "Mercedes",  "details": None}),
-        (3, {"id": 3, "color": "white", "name": "Audi", "details": "awesome car"})
-    ]
-)
-async def test_get_car_200(xclient: AsyncClient, car_id, expected):
-    response = await xclient.get(f"/cars/{car_id}")
+@pytest.mark.usefixtures("prepare_car")
+async def test_get_car_200(xclient: AsyncClient, car: CarModel, manufacturer: ManufacturerModel):
+    response = await xclient.get(f"/cars/{car.id}")
     assert response.status_code == 200, response.text
-    assert response.json() == expected
+    assert response.json() == {
+        "id": str(car.id),
+        "name": car.model,
+        "color": car.color,
+        "details": car.details,
+        "manufacturer": {
+            "id": str(manufacturer.id),
+            "name": manufacturer.name,
+            "country": manufacturer.country
+        }
+    }
 
 
 @pytest.mark.asyncio
 async def test_get_car_404(xclient: AsyncClient):
-    response = await xclient.get("/cars/999")
+    response = await xclient.get(f"/cars/{uuid4()}")
     assert response.status_code == 404, response.text
     assert response.json() == {"detail": "Car not found"}
 
@@ -30,17 +38,11 @@ async def test_get_car_422(xclient: AsyncClient):
     assert response.json() == {
         "detail": [
             {
+                'ctx': {'error': 'invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `o` at 1'},
                 "input": "one",
                 "loc": ["path", "car_id"],
-                "msg": "Input should be a valid integer, unable to parse string as an integer",
-                "type": "int_parsing"
+                "msg": "Input should be a valid UUID, invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `o` at 1",
+                "type": "uuid_parsing"
             }
         ]
     }
-
-
-@pytest.mark.asyncio
-async def test_get_car_500(xclient: AsyncClient):
-    with pytest.raises(ValueError) as exc:
-        await xclient.get("/cars/0")
-    assert str(exc.value) == "Cannot get car with id 0"

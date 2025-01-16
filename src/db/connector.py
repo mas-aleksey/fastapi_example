@@ -9,6 +9,7 @@ class DatabaseConnector:
         max_idle_conns: int = 2,
         max_open_conn: int = 16,
     ):
+        self.db_url = db_url
         self._engine = create_async_engine(
             db_url,
             pool_size=max_idle_conns,

@@ -1,13 +1,23 @@
 import pytest
 from httpx import AsyncClient
 
+from db.models import CarModel, ManufacturerModel
+
 
 @pytest.mark.asyncio
-async def test_get_car_list_200(xclient: AsyncClient):
+@pytest.mark.usefixtures("prepare_car")
+async def test_get_car_list_200(xclient: AsyncClient, car: CarModel, manufacturer: ManufacturerModel):
     response = await xclient.get("/cars/")
     assert response.status_code == 200, response.text
     assert response.json() == [
-        {"id": 1, "color": "blue", "name": "BMW",  "details": None},
-        {"id": 2, "color": "blue", "name": "Mercedes",  "details": None},
-        {"id": 3, "color": "white", "name": "Audi", "details": "awesome car"}
+        {
+            "id": str(car.id),
+            "name": car.model,
+            "color": car.color,
+            "manufacturer": {
+                "id": str(manufacturer.id),
+                "name": manufacturer.name,
+                "country": manufacturer.country
+            }
+        }
     ]
